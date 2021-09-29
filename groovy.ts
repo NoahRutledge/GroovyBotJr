@@ -84,7 +84,9 @@ bot.on('messageCreate', async (message) =>
 											}
 					);
 					subscription.Enqueue(track);
-					message.channel.send('Enqueued "' + track.Title + '"');
+					if(subscription.QueueLength() > 0)
+						message.channel.send('Enqueued "' + track.Title + '"');
+
 				} catch(error)
 				{
 					console.warn(error);
