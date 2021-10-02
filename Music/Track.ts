@@ -26,6 +26,7 @@ export class Track implements TrackData
 	public readonly Url: string;
 	public readonly Title: string;
 	public Resource: AudioResource<Track>;
+	public StartedResourceGet: boolean;
 	public readonly OnStart: (title: string) => void;
 	public readonly OnFinish: () => void;
 	public readonly OnError: (error: Error) => void;
@@ -34,6 +35,7 @@ export class Track implements TrackData
 	{
 		this.Url = Url;
 		this.Title = Title;
+		this.StartedResourceGet = false;
 		this.OnStart = OnStart;
 		this.OnFinish = OnFinish;
 		this.OnError = OnError;
@@ -41,8 +43,10 @@ export class Track implements TrackData
 
 	public CreateAudioResource(): Promise<AudioResource<Track>>
 	{
+		this.StartedResourceGet = true;
 		return new Promise((resolve, reject) =>
 		{
+			console.log("Creating ytdl");
 			var process = ytdl
 			(
 				this.Url,
@@ -54,6 +58,7 @@ export class Track implements TrackData
 				},
 				{ stdio: ['ignore', 'pipe', 'ignore']},
 			);
+			console.log("Finished ytdl");
 
 			if(!process.stdout)
 			{
@@ -72,16 +77,21 @@ export class Track implements TrackData
 
 			process.once('spawn', () => 
 			{
+				console.log("ytdl has 'spawned' starting probe?");
 				demuxProbe(stream)
 							.then((probe) => resolve(createAudioResource(probe.stream, {metadata: this, inputType: probe.type})))
 							.catch(OnError);
+				console.log("Finished probe");
 			}).catch(OnError);
+			console.log("Finished CreateAudioResource()");
 		});
 	}
 
 	public static async From(url: string, methods: Pick<Track, 'OnStart' | 'OnFinish' | 'OnError'>): Promise<Track>
 	{
+		console.log("Starting getting basic info");
 		const info = await getBasicInfo(url);
+		console.log("Finished getting basic info");
 		const wrappedMethods = 
 		{
 			OnStart()

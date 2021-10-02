@@ -61,9 +61,12 @@ bot.on('messageCreate', async (message) =>
 				try
 				{
 					var requestSong = message.content.substring(6);
+					console.log("Received play command for " + requestSong);
 					if(validateURL(requestSong) == false)
 					{
+						console.log("Starting youtube search scrape");
 						const searchResult = await ytsr(requestSong, YoutubeSearchOptions);
+						console.log("Finished search");
 						requestSong = searchResult.items[0].url;
 					}
 
@@ -84,8 +87,7 @@ bot.on('messageCreate', async (message) =>
 											}
 					);
 					subscription.Enqueue(track);
-					if(subscription.QueueLength() > 0)
-						message.channel.send('Enqueued "' + track.Title + '"');
+					message.channel.send('Enqueued "' + track.Title + '"');
 
 				} catch(error)
 				{

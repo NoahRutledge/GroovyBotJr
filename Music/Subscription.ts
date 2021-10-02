@@ -32,6 +32,7 @@ export class MusicSubscription
 
 		this.voiceConnection.on('stateChange', async (_, newState) => 
 		{
+			console.log("Voice connection state changed to " + newState.status);
 			if(newState.status === VoiceConnectionStatus.Disconnected) 
 			{
 				if(newState.reason === VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014)
@@ -87,6 +88,7 @@ export class MusicSubscription
 
 		this.audioPlayer.on('stateChange', (oldState, newState) => 
 		{
+			console.log("Audio player state changed from " + oldState.status + " to " + newState.status);
 			if(newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle)
 			{
 				//Entered idle state from a non-idle state.  Process queue to play next Track
@@ -114,11 +116,6 @@ export class MusicSubscription
 	{
 		this._queue.push(track);
 		this.ProcessQueue();
-		
-		if(this.QueueLength() > 0)
-		{
-			this.FetchNextTrack();
-		}
 	}
 
 	public Resume()
@@ -158,11 +155,22 @@ export class MusicSubscription
 
 	public async FetchNextTrack()
 	{
+		console.log("Attempting to fetch next track");
 		//Just to be safe
 		if(this.QueueLength() <= 0)
 			return;
-			
-		this._queue[0].Resource = await this._queue[0].CreateAudioResource();
+		
+		var t = this._queue[0];
+		if(t.StartedResourceGet == false)
+		{
+			console.log("pre-fetching audio resource for " + t.Title);
+			t.Resource = await t.CreateAudioResource();
+			console.log("Finished pre-fetch");
+		}
+		else
+		{
+			console.log("Next track has already started or made resource");
+		}
 	}
 
 	private async ProcessQueue(skip:boolean=false): Promise<void>
@@ -186,10 +194,18 @@ export class MusicSubscription
 		{
 			var resource = null;
 			if(nextTrack.Resource == null)
+			{
+				console.log("Starting create audio resource");
 				resource = await nextTrack.CreateAudioResource();
+				console.log("Finished create audio resource");
+			}
 			else
+			{
+				console.log("Resource already procurred");
 				resource = nextTrack.Resource;
+			}
 
+			console.log("Starting audio player with new resource: " + this.audioPlayer.state.status);
 			this.audioPlayer.play(resource);
 			this._currentTrack = nextTrack;
 			this._queueLock = false;
@@ -201,5 +217,7 @@ export class MusicSubscription
 			//If error occurs, try playing next item in queue
 			return this.ProcessQueue();
 		}
+
+		//this.FetchNextTrack();
 	}
 }
