@@ -4,7 +4,7 @@ import
 	createAudioResource,
 	demuxProbe
 } from '@discordjs/voice';
-
+import Discord, { GuildMember, Snowflake } from 'discord.js';
 import { raw as ytdl } from 'youtube-dl-exec';
 import { getBasicInfo } from 'ytdl-core';
 
@@ -27,18 +27,35 @@ export class Track implements TrackData
 	public readonly Title: string;
 	public Resource: AudioResource<Track>;
 	public StartedResourceGet: boolean;
-	public readonly OnStart: (title: string) => void;
-	public readonly OnFinish: () => void;
-	public readonly OnError: (error: Error) => void;
+	private _messages: Discord.Message[];
+	private _channel: Discord.TextBasedChannels;
 
-	constructor({Url, Title, OnStart, OnFinish, OnError}: TrackData)
+	constructor(url: string, title: string, channel: Discord.TextBasedChannels)
 	{
-		this.Url = Url;
-		this.Title = Title;
-		this.StartedResourceGet = false;
-		this.OnStart = OnStart;
-		this.OnFinish = OnFinish;
-		this.OnError = OnError;
+		this.Url = url;
+		this.Title = title;
+		this._channel = channel;
+		this._messages = [];
+	}
+
+	public async OnStart(title: string)
+	{
+		var m = await this._channel.send('Now Playing "' + title + '"');
+		this.AddMessage(m);
+	}
+
+	public OnFinish()
+	{
+		for(var message of this._messages)
+		{
+			message.delete();
+		}
+	}
+
+	public OnError(error: Error)
+	{
+		console.warn(error);
+		this._channel.send('Error: ' + error.message);
 	}
 
 	public CreateAudioResource(): Promise<AudioResource<Track>>
@@ -87,33 +104,17 @@ export class Track implements TrackData
 		});
 	}
 
-	public static async From(url: string, methods: Pick<Track, 'OnStart' | 'OnFinish' | 'OnError'>): Promise<Track>
+	public static async From(url: string, channel: Discord.TextBasedChannels): Promise<Track>
 	{
 		console.log("Starting getting basic info");
 		const info = await getBasicInfo(url);
 		console.log("Finished getting basic info");
-		const wrappedMethods = 
-		{
-			OnStart()
-			{
-				wrappedMethods.OnStart = noop;
-				methods.OnStart(info.videoDetails.title);
-			},
-			OnFinish()
-			{
-				wrappedMethods.OnFinish = noop;
-				methods.OnFinish();
-			},
-			OnError(error: Error)
-			{
-				wrappedMethods.OnError = noop;
-				methods.OnError(error);
-			},
-		};
 
-		return new Track({Title: info.videoDetails.title,
-						  Url: url,
-						  ...wrappedMethods,
-						  });
+		return new Track(url, info.videoDetails.title, channel);
+	}
+
+	public AddMessage(message: Discord.Message)
+	{
+		this._messages.push(message);
 	}
 }

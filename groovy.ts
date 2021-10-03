@@ -70,24 +70,10 @@ bot.on('messageCreate', async (message) =>
 						requestSong = searchResult.items[0].url;
 					}
 
-					const track = await Track.From(requestSong, 
-											{
-												OnStart(title: string)
-												{
-													message.channel.send('Now Playing "' + title + '"');
-												},
-												OnFinish()
-												{
-												},
-												OnError(error)
-												{
-													console.warn(error);
-													message.channel.send('Error: ' + error.message);
-												},
-											}
-					);
+					const track = await Track.From(requestSong, message.channel);
 					subscription.Enqueue(track);
-					message.channel.send('Enqueued "' + track.Title + '"');
+					var m = await message.channel.send('Enqueued "' + track.Title + '"')
+					track.AddMessage(m);
 
 				} catch(error)
 				{
@@ -123,22 +109,7 @@ bot.on('messageCreate', async (message) =>
 			case 'lemmeticklethefeet':
 				subscription.Stop();
 				message.channel.send('Giving the dick B)');
-				const track = await Track.From(DICKO_MODE, 
-											{
-												OnStart()
-												{
-												},
-												OnFinish()
-												{
-													subscription.Enqueue(track);
-												},
-												OnError(error)
-												{
-													console.warn(error);
-													message.channel.send('Error: ' + error.message);
-												},
-											}
-				);
+				const track = await Track.From(DICKO_MODE, message.channel);
 				subscription.Enqueue(track);
 				subscription.Enqueue(track);
 				break;
