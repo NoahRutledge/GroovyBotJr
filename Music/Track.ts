@@ -25,15 +25,17 @@ export class Track implements TrackData
 {
 	public readonly Url: string;
 	public readonly Title: string;
+	public readonly RequestMessage: string;
 	public Resource: AudioResource<Track>;
 	public StartedResourceGet: boolean;
 	private _messages: Discord.Message[];
 	private _channel: Discord.TextBasedChannels;
 
-	constructor(url: string, title: string, channel: Discord.TextBasedChannels)
+	constructor(url: string, title: string, requestMessage: string, channel: Discord.TextBasedChannels)
 	{
 		this.Url = url;
 		this.Title = title;
+		this.RequestMessage = requestMessage;
 		this._channel = channel;
 		this._messages = [];
 	}
@@ -107,11 +109,11 @@ export class Track implements TrackData
 		});
 	}
 
-	public static async From(url: string, channel: Discord.TextBasedChannels): Promise<Track>
+	public static async From(url: string, requestMessage: string, channel: Discord.TextBasedChannels): Promise<Track>
 	{
 		const info = await getBasicInfo(url);
 
-		return new Track(url, info.videoDetails.title, channel);
+		return new Track(url, info.videoDetails.title, requestMessage, channel);
 	}
 
 	public AddMessage(message: Discord.Message)

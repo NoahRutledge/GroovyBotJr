@@ -68,7 +68,7 @@ bot.on('messageCreate', async (message) =>
 						requestSong = searchResult.items[0].url;
 					}
 
-					const track = await Track.From(requestSong, message.channel);
+					const track = await Track.From(requestSong, requestSong, message.channel);
 					subscription.Enqueue(track);
 					var m = await message.channel.send('Enqueued "' + track.Title + '"')
 					track.AddMessage(m);
@@ -103,11 +103,15 @@ bot.on('messageCreate', async (message) =>
 				Subscriptions.delete(message.guildId);
 				break;
 
+			case 'remove':
+				
+				break;
+
 			case 'gimmethedick':
 			case 'lemmeticklethefeet':
 				subscription.Stop();
 				message.channel.send('Giving the dick B)');
-				const track = await Track.From(DICKO_MODE, message.channel);
+				const track = await Track.From(DICKO_MODE, "Dicko mode", message.channel);
 				subscription.Enqueue(track);
 				break;
 
