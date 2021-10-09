@@ -46,9 +46,15 @@ export class Track implements TrackData
 
 	public OnFinish()
 	{
-		for(var message of this._messages)
+		console.log("Reached here before error");
+		console.log("messages length for " + this.Title + ": " + this._messages.length);
+		if(this._messages.length !== 0)
 		{
-			message.delete();
+			for(var message of this._messages)
+			{
+				message.delete();
+			}
+			this._messages = [];
 		}
 	}
 
@@ -63,7 +69,6 @@ export class Track implements TrackData
 		this.StartedResourceGet = true;
 		return new Promise((resolve, reject) =>
 		{
-			console.log("Creating ytdl");
 			var process = ytdl
 			(
 				this.Url,
@@ -75,7 +80,6 @@ export class Track implements TrackData
 				},
 				{ stdio: ['ignore', 'pipe', 'ignore']},
 			);
-			console.log("Finished ytdl");
 
 			if(!process.stdout)
 			{
@@ -100,15 +104,12 @@ export class Track implements TrackData
 							.catch(OnError);
 				console.log("Finished probe");
 			}).catch(OnError);
-			console.log("Finished CreateAudioResource()");
 		});
 	}
 
 	public static async From(url: string, channel: Discord.TextBasedChannels): Promise<Track>
 	{
-		console.log("Starting getting basic info");
 		const info = await getBasicInfo(url);
-		console.log("Finished getting basic info");
 
 		return new Track(url, info.videoDetails.title, channel);
 	}

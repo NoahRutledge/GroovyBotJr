@@ -23,6 +23,7 @@ export class MusicSubscription
 	private _currentTrack: Track;
 	private _queueLock = false;
 	private _readyLock = false;
+	private _skipFlag = false;
 
 	public constructor(voiceConnection: VoiceConnection)
 	{
@@ -136,6 +137,7 @@ export class MusicSubscription
 		}
 		else
 		{
+			this._skipFlag = true;
 			this.ProcessQueue(true);
 		}
 	}
@@ -205,8 +207,14 @@ export class MusicSubscription
 				resource = nextTrack.Resource;
 			}
 
-			console.log("Starting audio player with new resource: " + this.audioPlayer.state.status);
 			this.audioPlayer.play(resource);
+
+			if(this._skipFlag)
+			{
+				this._skipFlag = false;
+				this._currentTrack.OnFinish();
+			}
+
 			this._currentTrack = nextTrack;
 			this._queueLock = false;
 		}
@@ -218,6 +226,6 @@ export class MusicSubscription
 			return this.ProcessQueue();
 		}
 
-		//this.FetchNextTrack();
+		this.FetchNextTrack();
 	}
 }

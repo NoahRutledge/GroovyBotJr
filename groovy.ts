@@ -64,9 +64,7 @@ bot.on('messageCreate', async (message) =>
 					console.log("Received play command for " + requestSong);
 					if(validateURL(requestSong) == false)
 					{
-						console.log("Starting youtube search scrape");
 						const searchResult = await ytsr(requestSong, YoutubeSearchOptions);
-						console.log("Finished search");
 						requestSong = searchResult.items[0].url;
 					}
 
