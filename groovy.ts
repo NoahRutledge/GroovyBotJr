@@ -109,7 +109,6 @@ bot.on('messageCreate', async (message) =>
 				message.channel.send('Giving the dick B)');
 				const track = await Track.From(DICKO_MODE, message.channel);
 				subscription.Enqueue(track);
-				subscription.Enqueue(track);
 				break;
 
 			default:
