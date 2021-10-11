@@ -99,7 +99,7 @@ export class MusicSubscription
 			else if(newState.status === AudioPlayerStatus.Playing)
 			{
 				var nextTrack = newState.resource as AudioResource<Track>
-				nextTrack.metadata.OnStart(this._currentTrack.Title);
+				nextTrack.metadata.OnStart();
 			}
 		});
 		
@@ -148,6 +148,20 @@ export class MusicSubscription
 		this._queue = [];
 		this.audioPlayer.stop(true);
 		this._queueLock = false;
+	}
+
+	public RemoveFromQueue(song: string)
+	{
+		for(var i = 0; i < this._queue.length; ++i)
+		{
+			var track = this._queue[i];
+			
+			if(track.IsTextMatch(song))
+			{
+				track.DeleteMessages();
+				this._queue.splice(i, 1);
+			}
+		}
 	}
 
 	public QueueLength(): number

@@ -4,14 +4,14 @@ import
 	createAudioResource,
 	demuxProbe
 } from '@discordjs/voice';
-import Discord, { GuildMember, Snowflake } from 'discord.js';
+import Discord, { MessageEmbed } from 'discord.js';
 import { raw as ytdl } from 'youtube-dl-exec';
 import { getBasicInfo } from 'ytdl-core';
 
 export interface TrackData {
 	Url: string;
 	Title: string;
-	OnStart: (title: string) => void;
+	OnStart: () => void;
 	OnFinish: () => void;
 	OnError: (error: Error) => void;
 }
@@ -20,6 +20,8 @@ const noop = () =>
 {
  //intentionally blank
 };
+
+const stringMatchingTolerance = 0.75;
 
 export class Track implements TrackData
 {
@@ -40,16 +42,21 @@ export class Track implements TrackData
 		this._messages = [];
 	}
 
-	public async OnStart(title: string)
+	public async OnStart()
 	{
-		var m = await this._channel.send('Now Playing "' + title + '"');
+		var link = new Discord.MessageEmbed()
+					   .setDescription("Now playing ["+this.Title+"]("+this.Url+")");
+		var m = await this._channel.send({embeds: [link]});//('Now Playing ' + link);
 		this.AddMessage(m);
 	}
 
 	public OnFinish()
 	{
-		console.log("Reached here before error");
-		console.log("messages length for " + this.Title + ": " + this._messages.length);
+		this.DeleteMessages();
+	}
+
+	public DeleteMessages()
+	{
 		if(this._messages.length !== 0)
 		{
 			for(var message of this._messages)
@@ -112,12 +119,65 @@ export class Track implements TrackData
 	public static async From(url: string, requestMessage: string, channel: Discord.TextBasedChannels): Promise<Track>
 	{
 		const info = await getBasicInfo(url);
-
 		return new Track(url, info.videoDetails.title, requestMessage, channel);
 	}
 
 	public AddMessage(message: Discord.Message)
 	{
 		this._messages.push(message);
+	}
+
+	public IsTextMatch(removeMessage: string): boolean
+	{
+		let removeMessageMap = new Map();
+		let removeMessageSplit = removeMessage.toLowerCase().split(" ");
+		let wordsToMatch = removeMessageSplit.length;
+		
+		for(var word of removeMessageSplit)
+		{
+			removeMessageMap.set(word, false);
+		}
+
+		var count = this.StringMatchCount(removeMessageMap, this.RequestMessage);
+
+		if((count / wordsToMatch) >= stringMatchingTolerance)
+		{
+			return true;
+		}
+
+		count += this.StringMatchCount(removeMessageMap, this.Title);
+		console.log(count);
+		if((count / wordsToMatch) >= stringMatchingTolerance)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	private StringMatchCount(matchWith: Map<string, boolean>, matchAgainst: string): number
+	{
+		var count = 0;
+
+		for(var word of matchAgainst.toLowerCase().split(" "))
+		{
+			for(var entry of matchWith.entries())
+			{	
+				if(entry[1])
+				{
+					continue;
+				}
+
+				if (word.includes(entry[0]))
+				{
+					matchWith.set(entry[0], true);
+					++count;
+					break;
+				}
+			}
+		}
+		return count;
 	}
 }

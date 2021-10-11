@@ -60,15 +60,19 @@ bot.on('messageCreate', async (message) =>
 
 				try
 				{
-					var requestSong = message.content.substring(6);
-					console.log("Received play command for " + requestSong);
-					if(validateURL(requestSong) == false)
+					var requestMessage = message.content.substring(6);
+					var requestUrl = "";
+					if(validateURL(requestMessage) == false)
 					{
-						const searchResult = await ytsr(requestSong, YoutubeSearchOptions);
-						requestSong = searchResult.items[0].url;
+						const searchResult = await ytsr(requestMessage, YoutubeSearchOptions);
+						requestUrl = searchResult.items[0].url;
+					}
+					else
+					{
+						requestUrl = requestMessage;
 					}
 
-					const track = await Track.From(requestSong, requestSong, message.channel);
+					const track = await Track.From(requestUrl, requestMessage, message.channel);
 					subscription.Enqueue(track);
 					var m = await message.channel.send('Enqueued "' + track.Title + '"')
 					track.AddMessage(m);
@@ -104,7 +108,8 @@ bot.on('messageCreate', async (message) =>
 				break;
 
 			case 'remove':
-				
+				var songToRemove = message.content.substring(8);
+				subscription.RemoveFromQueue(songToRemove);
 				break;
 
 			case 'gimmethedick':
