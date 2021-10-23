@@ -28,7 +28,8 @@ bot.on('ready', () => console.log('Ready!'));
 
 bot.on('messageCreate', async (message) =>
 {
-	if(message.content.substring(0, 1) == '!')
+	var commandChar = message.content.substring(0, 1);
+	if(commandChar == '!' || commandChar == '-')
 	{
 		const args = message.content.substring(1).split(' ');
 		const command = args[0].toLowerCase();
