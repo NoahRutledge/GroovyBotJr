@@ -1,8 +1,6 @@
 import Discord, { GuildMember, Snowflake } from 'discord.js';
 import 
 {
-	AudioPlayerStatus,
-	AudioResource,
 	entersState,
 	joinVoiceChannel,
 	VoiceConnectionStatus
@@ -21,8 +19,6 @@ const YoutubeSearchOptions =
 	limit: 1,
 	safeSearch: false,
 };
-
-const DICKO_MODE = "https://www.youtube.com/watch?v=AUbmUEq6uWA&ab_channel=Kusorare-Topic";
 
 bot.on('ready', () => console.log('Ready!'));
 
@@ -111,14 +107,6 @@ bot.on('messageCreate', async (message) =>
 			case 'remove':
 				var songToRemove = message.content.substring(8);
 				subscription.RemoveFromQueue(songToRemove);
-				break;
-
-			case 'gimmethedick':
-			case 'lemmeticklethefeet':
-				subscription.Stop();
-				message.channel.send('Giving the dick B)');
-				const track = await Track.From(DICKO_MODE, "Dicko mode", message.channel);
-				subscription.Enqueue(track);
 				break;
 
 			default:
