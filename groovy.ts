@@ -39,7 +39,7 @@ bot.on('messageCreate', async (message) =>
 	let subscription = Subscriptions.get(message.guildId);
 	if(!subscription && message.content.toLowerCase().includes('groovy bot'))
 	{
-		TryEnterChannel(message);
+		TryEnterChannel(message);	
 	}
 });
 
