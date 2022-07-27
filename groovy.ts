@@ -6,7 +6,7 @@ const bot = new Discord.Client({intents: ['GUILDS', 'GUILD_VOICE_STATES', 'GUILD
 const { token } = require('../auth.json');
 export const Subscriptions = new Map<Snowflake, MusicSubscription>();
 
-const MUSIC_COMMANDS = ["play", "skip", "disconnect", "stop", "resume", "remove"];
+const MUSIC_COMMANDS = ["play", "skip", "pause", "disconnect", "stop", "resume", "remove"];
 
 bot.on('ready', () => console.log('Ready!'));
 
