@@ -31,9 +31,9 @@ export class Track implements TrackData
 	public Resource: AudioResource<Track>;
 	public StartedResourceGet: boolean;
 	private _messages: Discord.Message[];
-	private _channel: Discord.TextBasedChannels;
+	private _channel: Discord.TextBasedChannel;
 
-	constructor(url: string, title: string, requestMessage: string, channel: Discord.TextBasedChannels)
+	constructor(url: string, title: string, requestMessage: string, channel: Discord.TextBasedChannel)
 	{
 		this.Url = url;
 		this.Title = title;
@@ -116,7 +116,7 @@ export class Track implements TrackData
 		});
 	}
 
-	public static async From(url: string, requestMessage: string, channel: Discord.TextBasedChannels): Promise<Track>
+	public static async From(url: string, requestMessage: string, channel: Discord.TextBasedChannel): Promise<Track>
 	{
 		const info = await getBasicInfo(url);
 		return new Track(url, info.videoDetails.title, requestMessage, channel);

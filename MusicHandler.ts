@@ -1,4 +1,4 @@
-﻿import { entersState, joinVoiceChannel, VoiceConnectionStatus } from '@discordjs/voice';
+﻿import { DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, VoiceConnectionStatus } from '@discordjs/voice';
 import { validateURL } from 'ytdl-core';
 
 import Discord, { GuildMember, MessagePayload, Snowflake } from 'discord.js';
@@ -109,7 +109,7 @@ function CreateChannelSubscription(message: Discord.Message): MusicSubscription 
 				joinVoiceChannel({
 					channelId: channel.id,
 					guildId: channel.guild.id,
-					adapterCreator: channel.guild.voiceAdapterCreator,
+					adapterCreator: channel.guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
 				})
 			);
 		subscription.voiceConnection.on('error', console.warn);
