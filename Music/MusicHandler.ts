@@ -1,7 +1,7 @@
 ﻿import { DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, VoiceConnectionStatus } from '@discordjs/voice';
 import { validateURL } from 'ytdl-core';
 
-import Discord, { GuildMember, MessagePayload, Snowflake } from 'discord.js';
+import Discord, { GuildMember} from 'discord.js';
 
 import { Track } from './Track';
 import { MusicSubscription } from './Subscription';

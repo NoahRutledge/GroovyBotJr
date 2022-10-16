@@ -4,7 +4,7 @@ import
 	createAudioResource,
 	demuxProbe
 } from '@discordjs/voice';
-import Discord, { MessageEmbed } from 'discord.js';
+import Discord from 'discord.js';
 import { raw as ytdl } from 'youtube-dl-exec';
 import { getBasicInfo } from 'ytdl-core';
 
