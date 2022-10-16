@@ -1,5 +1,5 @@
 import Discord, { Snowflake } from 'discord.js';
-import { HandleMusicCommand, TryEnterChannel } from './MusicHandler';
+import { HandleMusicCommand, TryEnterChannel } from './Music/MusicHandler';
 import { MusicSubscription } from './Music/Subscription';
 
 const bot = new Discord.Client({intents: ['GUILDS', 'GUILD_VOICE_STATES', 'GUILD_MESSAGES']});
@@ -8,8 +8,9 @@ export const Subscriptions = new Map<Snowflake, MusicSubscription>();
 
 const MUSIC_COMMANDS = ["play", "skip", "pause", "disconnect", "stop", "resume", "remove"];
 
-bot.on('ready', () => console.log('Ready!'));
+const GAMECODE_TIMEOUT_DEFAULT = 2;
 
+bot.on('ready', () => console.log('Ready!'));
 bot.on('messageCreate', async (message) =>
 {
 	var commandChar = message.content.substring(0, 1);
@@ -26,6 +27,24 @@ bot.on('messageCreate', async (message) =>
 
 		switch(command)
 		{
+			case 'gamecode':
+				if (args.length < 1)
+				{
+					message.channel.send("Not enough arguments: gamecode [message] [(optional) number in minutes: message duration]");
+					return;
+				}
+
+				const channel = message.channel;
+
+				message.delete();
+				var m = channel.send(args[1]);
+				var duration = args.length == 3 ? +args[2] : GAMECODE_TIMEOUT_DEFAULT;
+				//Scale up to seconds/minutes
+				duration *= 60000;
+				setTimeout(temp, duration, m);
+
+				break;
+
 			case 'doubt':
 				message.channel.send({files: ["./images/doubt.jpg"]});
 				break;
@@ -42,5 +61,12 @@ bot.on('messageCreate', async (message) =>
 		TryEnterChannel(message);	
 	}
 });
+
+function temp(messagePromise: Promise<Discord.Message<boolean>>)
+{
+	messagePromise.then(function (message) {
+		message.delete();
+	});
+}
 
 bot.login(token);

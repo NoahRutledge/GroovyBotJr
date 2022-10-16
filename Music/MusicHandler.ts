@@ -3,9 +3,9 @@ import { validateURL } from 'ytdl-core';
 
 import Discord, { GuildMember, MessagePayload, Snowflake } from 'discord.js';
 
-import { Track } from './Music/Track';
-import { MusicSubscription } from './Music/Subscription';
-import { Subscriptions } from './groovy';
+import { Track } from './Track';
+import { MusicSubscription } from './Subscription';
+import { Subscriptions } from '../groovy';
 
 const ytsr = require('ytsr');
 const YoutubeSearchOptions =
