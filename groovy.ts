@@ -28,7 +28,7 @@ bot.on('messageCreate', async (message) =>
 		switch(command)
 		{
 			case 'gamecode':
-				if (args.length < 1)
+				if (args.length < 2)
 				{
 					message.channel.send("Not enough arguments: gamecode [message] [(optional) number in minutes: message duration]");
 					return;
