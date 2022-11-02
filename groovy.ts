@@ -8,7 +8,7 @@ export const Subscriptions = new Map<Snowflake, MusicSubscription>();
 
 const MUSIC_COMMANDS = ["play", "skip", "pause", "disconnect", "stop", "resume", "remove"];
 
-const GAMECODE_TIMEOUT_DEFAULT = 2;
+const TEMPMESSAGE_TIMEOUT_DEFAULT = 2;
 
 bot.on('ready', () => console.log('Ready!'));
 bot.on('messageCreate', async (message) =>
@@ -27,10 +27,10 @@ bot.on('messageCreate', async (message) =>
 
 		switch(command)
 		{
-			case 'gamecode':
+			case 'tempmessage':
 				if (args.length < 2)
 				{
-					message.channel.send("Not enough arguments: gamecode [message] [(optional) number in minutes: message duration]");
+					message.channel.send("Not enough arguments: tempmessage [message] [(optional) number in minutes: message duration]");
 					return;
 				}
 
@@ -38,7 +38,7 @@ bot.on('messageCreate', async (message) =>
 
 				message.delete();
 				var m = channel.send(args[1]);
-				var duration = args.length == 3 ? +args[2] : GAMECODE_TIMEOUT_DEFAULT;
+				var duration = args.length == 3 ? +args[2] : TEMPMESSAGE_TIMEOUT_DEFAULT;
 				//Scale up to seconds/minutes
 				duration *= 60000;
 				setTimeout(temp, duration, m);
