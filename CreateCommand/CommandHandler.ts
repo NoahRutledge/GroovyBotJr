@@ -20,7 +20,7 @@ export async function HandleUserMadeCommand(command: string, args: string[], mes
             }
             else
             {
-                const commandName = args[0];
+                const commandName = args[0].toLowerCase();
                 let commandAction;
                 if (message.attachments.size !== 0)
                     commandAction = message.attachments.at(0).url;
@@ -37,11 +37,11 @@ export async function HandleUserMadeCommand(command: string, args: string[], mes
             }
             break;
         case "removecommand":
-            if (args.length < 2)
+            if (args.length < 1)
                 message.channel.send('Please specifiy the command to remove!');
             else
             {
-                const commandName = args[1];
+                const commandName = args[0].toLowerCase();
                 const result = await RemoveCommand(commandName);
                 message.channel.send(result);
             }
