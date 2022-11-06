@@ -27,8 +27,48 @@ export async function HandleUserMadeCommand(command: string, args: string[], mes
             }
             break;
         case "removecommand":
+            if (args.length < 2)
+                message.channel.send('Please specifiy the command to remove!');
+            else
+            {
+                const commandName = args[1];
+                const result = await RemoveCommand(commandName);
+                message.channel.send(result);
+            }
             break;
     }
+}
+
+async function RemoveCommand(commandName: string)
+{
+    let fileData;
+    try
+    {
+        fileData = await ReadCommandFile();
+        fileData = JSON.parse(fileData);
+    }
+    catch (error)
+    {
+        if (error.code === 'ENOENT')
+            return "No existing commands to remove!";
+        else
+        {
+            Logger.LogError(error, "Error when trying to read commands file");
+            return "An error has occured!  Failed to remove command";
+        }
+    }
+
+    const commandIndex = fileData.commands.findIndex((val) => val.Name === commandName);
+    fileData.commands.splice(commandIndex, 1);
+
+    try {
+        await fs.writeFile(FILE_PATH, JSON.stringify(fileData));
+    }
+    catch (error) {
+        Logger.LogError(error, "Error when trying to write to commands file");
+        return "An error has occured! Failed to remove command.";
+    }
+    return "Successfully removed command!";
 }
 
 async function EditCommand(commandName: string, newCommandAction: string): Promise<string>
@@ -37,6 +77,7 @@ async function EditCommand(commandName: string, newCommandAction: string): Promi
     try
     {
         fileData = await ReadCommandFile();
+        fileData = JSON.parse(fileData);
     }
     catch (error)
     {
@@ -49,7 +90,6 @@ async function EditCommand(commandName: string, newCommandAction: string): Promi
         }
     }
 
-    fileData = JSON.parse(fileData);
     fileData.commands.forEach((val) => { if(val.Name === commandName) val.Action = newCommandAction; });
 
     try
@@ -59,7 +99,7 @@ async function EditCommand(commandName: string, newCommandAction: string): Promi
     catch (error)
     {
         Logger.LogError(error, "Error when trying to write to commands file");
-        return "An error has occured! Failed to create command.";
+        return "An error has occured! Failed to edit command.";
     }
     return "Successfully updated command!";
 }
