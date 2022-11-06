@@ -9,16 +9,24 @@ let CachedCommands = new Map<string, string>();
 
 export async function HandleUserMadeCommand(command: string, args: string[], message: Discord.Message)
 {
+    args = args.splice(1);
     switch (command)
     {
         case "makecommand":
         case "editcommand":
-            if (args.length < 3)
-                message.channel.send(`Not enough arguments: ${command} [command name] [action]`);
+            if ((args.length === 1 && message.attachments.size < 1) || (message.attachments.size === 0 && args.length < 2))
+            {
+                message.channel.send(`Invalid number of arguments: ${command} [command name] [action or attachment]`);
+            }
             else
             {
-                const commandName = args[1];
-                const commandAction = message.content.substring(command.length + args[1].length + 3);
+                const commandName = args[0];
+                let commandAction;
+                if (message.attachments.size !== 0)
+                    commandAction = message.attachments.at(0).url;
+                else
+                    commandAction = message.content.substring(command.length + args[0].length + 3);
+
                 let result;
                 if (command === "makecommand")
                     result = await CreateCommand(commandName, commandAction);
