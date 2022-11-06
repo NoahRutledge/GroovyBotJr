@@ -41,14 +41,15 @@ bot.on('messageCreate', async (message) =>
 			case 'temp':
 				if (args.length < 2)
 				{
-					message.channel.send("Not enough arguments: temp[message] [(optional) number in minutes: message duration]");
+					message.channel.send("Not enough arguments: temp[message] [(optional) message duration in minutes]");
 					return;
 				}
 
 				const channel = message.channel;
+				const userNickname = await message.guild.members.fetch(message.author).then(function (result) { return result.nickname; });
 
 				message.delete();
-				var messagePromise = channel.send(args[1]);
+				var messagePromise = channel.send(`${userNickname} said: ${args[1]}`);
 				var duration = args.length == 3 ? +args[2] : TEMPMESSAGE_TIMEOUT_DEFAULT;
 				//Scale up to seconds/minutes
 				duration *= 60000;
