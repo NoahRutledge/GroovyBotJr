@@ -38,21 +38,21 @@ bot.on('messageCreate', async (message) =>
 				}
 				break;
 
-			case 'tempmessage':
+			case 'temp':
 				if (args.length < 2)
 				{
-					message.channel.send("Not enough arguments: tempmessage [message] [(optional) number in minutes: message duration]");
+					message.channel.send("Not enough arguments: temp[message] [(optional) number in minutes: message duration]");
 					return;
 				}
 
 				const channel = message.channel;
 
 				message.delete();
-				var m = channel.send(args[1]);
+				var messagePromise = channel.send(args[1]);
 				var duration = args.length == 3 ? +args[2] : TEMPMESSAGE_TIMEOUT_DEFAULT;
 				//Scale up to seconds/minutes
 				duration *= 60000;
-				setTimeout(temp, duration, m);
+				setTimeout(RemoveTemp, duration, messagePromise);
 
 				break;
 
@@ -73,7 +73,7 @@ bot.on('messageCreate', async (message) =>
 	}
 });
 
-function temp(messagePromise: Promise<Discord.Message<boolean>>)
+function RemoveTemp(messagePromise: Promise<Discord.Message<boolean>>)
 {
 	messagePromise.then(function (message) {
 		message.delete();
