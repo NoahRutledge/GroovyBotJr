@@ -86,7 +86,7 @@ export async function HandleMusicCommand(command: string, args: string[], messag
     }
 }
 
-export function TryEnterChannel(message: Discord.Message): MusicSubscription {
+function TryEnterChannel(message: Discord.Message): MusicSubscription {
 	var subscription = Subscriptions.get(message.guildId);
 	if (!subscription) {
 		subscription = CreateChannelSubscription(message);

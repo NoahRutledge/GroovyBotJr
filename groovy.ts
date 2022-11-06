@@ -1,5 +1,5 @@
 import Discord, { Snowflake } from 'discord.js';
-import { HandleMusicCommand, TryEnterChannel, MUSIC_COMMANDS } from './Music/MusicHandler';
+import { HandleMusicCommand, MUSIC_COMMANDS } from './Music/MusicHandler';
 import { MusicSubscription } from './Music/Subscription';
 import { HandleUserMadeCommand, USER_MADE_COMMANDS } from './CreateCommand/CommandHandler';
 
@@ -55,12 +55,6 @@ bot.on('messageCreate', async (message) =>
 				message.channel.send('Not a recognized command!');
 				break;
 		}
-	}
-
-	let subscription = Subscriptions.get(message.guildId);
-	if(!subscription && message.content.toLowerCase().includes('groovy bot'))
-	{
-		TryEnterChannel(message);	
 	}
 });
 
