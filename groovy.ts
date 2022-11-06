@@ -1,13 +1,11 @@
 import Discord, { Snowflake } from 'discord.js';
-import { HandleMusicCommand, TryEnterChannel } from './Music/MusicHandler';
+import { HandleMusicCommand, TryEnterChannel, MUSIC_COMMANDS } from './Music/MusicHandler';
 import { MusicSubscription } from './Music/Subscription';
-import { CreateCommand } from './CreateCommand/CommandHandler';
+import { HandleUserMadeCommand, USER_MADE_COMMANDS } from './CreateCommand/CommandHandler';
 
 const bot = new Discord.Client({intents: ['GUILDS', 'GUILD_VOICE_STATES', 'GUILD_MESSAGES']});
 const { token } = require('../auth.json');
 export const Subscriptions = new Map<Snowflake, MusicSubscription>();
-
-const MUSIC_COMMANDS = ["play", "skip", "pause", "disconnect", "stop", "resume", "remove"];
 
 const TEMPMESSAGE_TIMEOUT_DEFAULT = 2;
 
@@ -26,18 +24,14 @@ bot.on('messageCreate', async (message) =>
 			return;
         }
 
+		if (USER_MADE_COMMANDS.includes(command))
+		{
+			HandleUserMadeCommand(command, args, message);
+			return;
+        }
+
 		switch(command)
 		{
-			case 'makecommand':
-				if (args.length < 3)
-					message.channel.send("Not enough arguments: createcommand [command name] [action]");
-				else
-				{
-					let commandAction = message.content.substring(command.length + args[1].length + 3);
-					StartCreateCommand(message, args[1], commandAction);
-				}
-				break;
-
 			case 'temp':
 				if (args.length < 2)
 				{
@@ -55,10 +49,6 @@ bot.on('messageCreate', async (message) =>
 				duration *= 60000;
 				setTimeout(RemoveTemp, duration, messagePromise);
 
-				break;
-
-			case 'doubt':
-				message.channel.send({files: ["./images/doubt.jpg"]});
 				break;
 
 			default:
@@ -79,12 +69,6 @@ function RemoveTemp(messagePromise: Promise<Discord.Message<boolean>>)
 	messagePromise.then(function (message) {
 		message.delete();
 	});
-}
-
-async function StartCreateCommand(message: Discord.Message, name: string, action: string)
-{
-	let result = await CreateCommand(name, action);
-	message.channel.send(result);
 }
 
 bot.login(token);

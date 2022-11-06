@@ -1,8 +1,6 @@
 ﻿import { DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, VoiceConnectionStatus } from '@discordjs/voice';
 import { validateURL } from 'ytdl-core';
-
 import Discord, { GuildMember} from 'discord.js';
-
 import { Track } from './Track';
 import { MusicSubscription } from './Subscription';
 import { Subscriptions } from '../groovy';
@@ -13,6 +11,8 @@ const YoutubeSearchOptions =
 	limit: 1,
 	safeSearch: false,
 };
+
+export const MUSIC_COMMANDS = ["play", "skip", "pause", "disconnect", "stop", "resume", "remove"];
 
 export async function HandleMusicCommand(command: string, args: string[], message: Discord.Message)
 {
