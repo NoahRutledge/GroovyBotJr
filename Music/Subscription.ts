@@ -12,6 +12,7 @@ import
 
 import { Track } from './Track';
 import { promisify } from 'util';
+import { Logger } from '../groovy';
 
 const wait = promisify(setTimeout);
 
@@ -33,7 +34,7 @@ export class MusicSubscription
 
 		this.voiceConnection.on('stateChange', async (_, newState) => 
 		{
-			console.log("Voice connection state changed to " + newState.status);
+			Logger.LogInfo("Voice connection state changed to " + newState.status);
 			if(newState.status === VoiceConnectionStatus.Disconnected) 
 			{
 				if(newState.reason === VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014)
@@ -89,7 +90,7 @@ export class MusicSubscription
 
 		this.audioPlayer.on('stateChange', (oldState, newState) => 
 		{
-			console.log("Audio player state changed from " + oldState.status + " to " + newState.status);
+			Logger.LogInfo("Audio player state changed from " + oldState.status + " to " + newState.status);
 			if(newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle)
 			{
 				//Entered idle state from a non-idle state.  Process queue to play next Track
@@ -171,7 +172,7 @@ export class MusicSubscription
 
 	public async FetchNextTrack()
 	{
-		console.log("Attempting to fetch next track");
+		Logger.LogInfo("Attempting to fetch next track");
 		//Just to be safe
 		if(this.QueueLength() <= 0)
 			return;
@@ -179,13 +180,13 @@ export class MusicSubscription
 		var t = this._queue[0];
 		if(t.StartedResourceGet == false)
 		{
-			console.log("pre-fetching audio resource for " + t.Title);
+			Logger.LogInfo("pre-fetching audio resource for " + t.Title);
 			t.Resource = await t.CreateAudioResource();
-			console.log("Finished pre-fetch");
+			Logger.LogInfo("Finished pre-fetch");
 		}
 		else
 		{
-			console.log("Next track has already started or made resource");
+			Logger.LogInfo("Next track has already started or made resource");
 		}
 	}
 
@@ -211,13 +212,13 @@ export class MusicSubscription
 			var resource = null;
 			if(nextTrack.Resource == null)
 			{
-				console.log("Starting create audio resource");
+				Logger.LogInfo("Starting create audio resource");
 				resource = await nextTrack.CreateAudioResource();
-				console.log("Finished create audio resource");
+				Logger.LogInfo("Finished create audio resource");
 			}
 			else
 			{
-				console.log("Resource already procurred");
+				Logger.LogInfo("Resource already procurred");
 				resource = nextTrack.Resource;
 			}
 

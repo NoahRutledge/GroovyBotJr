@@ -3,6 +3,7 @@ import { validateURL } from 'ytdl-core';
 import Discord, { Snowflake, GuildMember} from 'discord.js';
 import { Track } from './Track';
 import { MusicSubscription } from './Subscription';
+import { Logger } from '../groovy';
 const ytsr = require('ytsr');
 
 export const MUSIC_COMMANDS = ["play", "skip", "pause", "disconnect", "stop", "resume", "remove"];
@@ -22,6 +23,8 @@ export async function HandleMusicCommand(command: string, args: string[], messag
 		switch (command) {
 			case 'play':
 				subscription = TryEnterChannel(message);
+				if (subscription === null)
+					message.channel.send("Failed to create join channel!");
 				break;
 			default:
 				return;
@@ -37,26 +40,40 @@ export async function HandleMusicCommand(command: string, args: string[], messag
 				return;
 			}
 
-			try {
-				var requestMessage = message.content.substring(6);
-				var requestUrl = "";
-				if (validateURL(requestMessage) == false) {
+			const requestMessage = message.content.substring(6);
+			let requestUrl = requestMessage;
+
+			if (validateURL(requestMessage) == false)
+			{
+				try
+				{
 					const searchResult = await ytsr(requestMessage, YoutubeSearchOptions);
 					requestUrl = searchResult.items[0].url;
 				}
-				else {
-					requestUrl = requestMessage;
-				}
-
-				const track = await Track.From(requestUrl, requestMessage, message.channel);
-				subscription.Enqueue(track);
-				var m = await message.channel.send('Enqueued "' + track.Title + '"')
-				track.AddMessage(m);
-
-			} catch (error) {
-				console.warn(error);
-				message.channel.send('Failed to play track!');
+				catch (error)
+				{
+					Logger.LogError(error, 'Failed to find track from ytsr');
+					message.channel.send("Failed to play track!  Check the logs for more details.");
+					return;
+                }
 			}
+
+			let track;
+			try
+			{
+				track = await Track.From(requestUrl, requestMessage, message.channel);
+			}
+			catch (error)
+			{
+				Logger.LogError(error, 'Failed in getting video from URL');
+				message.channel.send("Failed to play track with found URL!  Check the logs for more details.");
+				return;
+			}
+
+			subscription.Enqueue(track);
+			var m = await message.channel.send('Enqueued "' + track.Title + '"')
+			track.AddMessage(m);
+
 			break;
 
 		case 'stop':
@@ -89,17 +106,24 @@ export async function HandleMusicCommand(command: string, args: string[], messag
 
 function TryEnterChannel(message: Discord.Message): MusicSubscription {
 	var subscription = Subscriptions.get(message.guildId);
-	if (!subscription) {
+	if (subscription == null)
+	{
 		subscription = CreateChannelSubscription(message);
-		if (!subscription)
+		if (subscription == null)
 			return null;
 	}
 
-	try {
+	try
+	{
 		entersState(subscription.voiceConnection, VoiceConnectionStatus.Ready, 20e3);
 		return subscription;
 	}
-	catch (error) { console.warn(error); return null; }
+	catch (error)
+	{
+		Logger.LogError(error, "Connection status failed to be ready");
+		message.channel.send("Something broke!  Please check log for more information!");
+		return null;
+	}
 }
 
 function CreateChannelSubscription(message: Discord.Message): MusicSubscription {
@@ -113,7 +137,7 @@ function CreateChannelSubscription(message: Discord.Message): MusicSubscription 
 					adapterCreator: channel.guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
 				})
 			);
-		subscription.voiceConnection.on('error', console.warn);
+		subscription.voiceConnection.on('error', Logger.LogError);
 		Subscriptions.set(message.guildId, subscription);
 		return subscription;
 	}

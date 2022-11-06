@@ -7,7 +7,46 @@ const { token } = require('../auth.json');
 
 const TEMPMESSAGE_TIMEOUT_DEFAULT = 2;
 
-bot.on('ready', () => console.log('Ready!'));
+
+/// LOGGER SETUP
+const winston = require('winston');
+const { combine, printf, errors } = winston.format;
+const LoggingFormat = printf(({ level, message, stack }) => { let r = `${level}: ${message}`; if (stack) r += `\n${stack}`; return r });
+
+export class Logger
+{
+	static Logger = winston.createLogger(
+		{
+			level: 'info',
+			format: combine(errors({ stack: true }), LoggingFormat),
+			transports:
+				[
+					new winston.transports.File({ filename: 'Log/bot.log' }),
+					new winston.transports.Console()
+				],
+			exceptionHandlers:
+				[
+					new winston.transports.File({ filename: 'Log/uncaughtexception.log' }),
+					new winston.transports.Console()
+				],
+			exitOnError: false,
+		}
+	);
+
+	static LogInfo(content: any)
+	{
+		this.Logger.info(content);
+	}
+
+
+	static LogError(error: Error, message : string = "")
+	{
+		this.Logger.error(message, {message: error});
+    }
+}
+///END LOGGER SETUP
+
+bot.on('ready', () => { Logger.LogInfo("Ready!"); });
 bot.on('messageCreate', async (message) =>
 {
 	var commandChar = message.content.substring(0, 1);
@@ -51,6 +90,7 @@ bot.on('messageCreate', async (message) =>
 
 			default:
 				message.channel.send('Not a recognized command!');
+				Logger.LogInfo(`Attempted not recognized command (${message.content})`);
 				break;
 		}
 	}

@@ -7,6 +7,7 @@ import
 import Discord from 'discord.js';
 import { raw as ytdl } from 'youtube-dl-exec';
 import { getBasicInfo } from 'ytdl-core';
+import { Logger } from '../groovy';
 
 export interface TrackData {
 	Url: string;
@@ -46,7 +47,7 @@ export class Track implements TrackData
 	{
 		var link = new Discord.MessageEmbed()
 					   .setDescription("Now playing ["+this.Title+"]("+this.Url+")");
-		var m = await this._channel.send({embeds: [link]});//('Now Playing ' + link);
+		var m = await this._channel.send({embeds: [link]});
 		this.AddMessage(m);
 	}
 
@@ -69,8 +70,8 @@ export class Track implements TrackData
 
 	public OnError(error: Error)
 	{
-		console.warn(error);
-		this._channel.send('Error: ' + error.message);
+		Logger.LogError(error);
+		this._channel.send('An error has occured! Check the logs for more details.');
 	}
 
 	public CreateAudioResource(): Promise<AudioResource<Track>>
@@ -146,7 +147,6 @@ export class Track implements TrackData
 		}
 
 		count += this.StringMatchCount(removeMessageMap, this.Title);
-		console.log(count);
 		if((count / wordsToMatch) >= stringMatchingTolerance)
 		{
 			return true;

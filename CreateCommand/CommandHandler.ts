@@ -1,4 +1,5 @@
 import Discord from 'discord.js';
+import { Logger } from '../groovy';
 const fs = require('fs/promises');
 
 const FILE_PATH = "./CreateCommand/Commands.json";
@@ -36,27 +37,44 @@ async function CreateCommand(commandName: string, commandAction: string, ) : Pro
     let dataToWrite = null;
     let response;
 
-    await fs.readFile(FILE_PATH)
-        .then(function (data)
+    try
+    {
+        await fs.readFile(FILE_PATH)
+            .then(function (data)
+            {
+                const commandData = JSON.parse(data);
+
+                if (commandData.commands.filter((val) => { return val.Name === commandName; }).length > 0)
+                    response = "Command already exists!";
+
+                dataToWrite = commandData;
+            });
+    }
+    catch (error)
+    {
+        if (error.code !== 'ENOENT')
         {
-            const commandData = JSON.parse(data);
-
-            if (commandData.commands.filter((val) => { return val.Name === commandName; }).length > 0)
-                response = "Command already exists!";
-
-            dataToWrite = commandData;
-        })
-        .catch(function (error) { if (error.code !== 'ENOENT') throw error;});
+            Logger.LogError(error, "Error when trying to read commands file");
+            response = "An error has occured! Failed to create command.";
+            return response;
+        }
+    }
 
     if (response)
         return response;
 
-    await WriteNewCommand(commandName, commandAction, dataToWrite)
-        .then(function (functionResult)
-        {
-            response = functionResult;
-        });
-
+    try
+    {
+        await WriteNewCommand(commandName, commandAction, dataToWrite)
+            .then(function (functionResult) {
+                response = functionResult;
+            });
+    }
+    catch (error)
+    {
+        Logger.LogError(error, "Error when trying to write to commands file");
+        response = "An error has occured! Failed to create command.";
+    }
     return response;
 }
 
