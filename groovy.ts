@@ -1,6 +1,7 @@
 import Discord, { Snowflake } from 'discord.js';
 import { HandleMusicCommand, TryEnterChannel } from './Music/MusicHandler';
 import { MusicSubscription } from './Music/Subscription';
+import { CreateCommand } from './CreateCommand/CommandHandler';
 
 const bot = new Discord.Client({intents: ['GUILDS', 'GUILD_VOICE_STATES', 'GUILD_MESSAGES']});
 const { token } = require('../auth.json');
@@ -27,6 +28,16 @@ bot.on('messageCreate', async (message) =>
 
 		switch(command)
 		{
+			case 'makecommand':
+				if (args.length < 3)
+					message.channel.send("Not enough arguments: createcommand [command name] [action]");
+				else
+				{
+					let commandAction = message.content.substring(command.length + args[1].length + 3);
+					StartCreateCommand(message, args[1], commandAction);
+				}
+				break;
+
 			case 'tempmessage':
 				if (args.length < 2)
 				{
@@ -67,6 +78,12 @@ function temp(messagePromise: Promise<Discord.Message<boolean>>)
 	messagePromise.then(function (message) {
 		message.delete();
 	});
+}
+
+async function StartCreateCommand(message: Discord.Message, name: string, action: string)
+{
+	let result = await CreateCommand(name, action);
+	message.channel.send(result);
 }
 
 bot.login(token);
