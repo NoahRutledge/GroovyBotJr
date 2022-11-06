@@ -5,6 +5,8 @@ const fs = require('fs/promises');
 const FILE_PATH = "./CreateCommand/Commands.json";
 export const USER_MADE_COMMANDS = ["makecommand", "editcommand", "removecommand"];
 
+let CachedCommands = new Map<string, string>();
+
 export async function HandleUserMadeCommand(command: string, args: string[], message: Discord.Message)
 {
     switch (command)
@@ -59,10 +61,14 @@ async function RemoveCommand(commandName: string)
     }
 
     const commandIndex = fileData.commands.findIndex((val) => val.Name === commandName);
+    if (commandIndex === -1)
+        return "Command doesn't exist!";
+
     fileData.commands.splice(commandIndex, 1);
 
     try {
         await fs.writeFile(FILE_PATH, JSON.stringify(fileData));
+        CachedCommands.delete(commandName);
     }
     catch (error) {
         Logger.LogError(error, "Error when trying to write to commands file");
@@ -90,11 +96,15 @@ async function EditCommand(commandName: string, newCommandAction: string): Promi
         }
     }
 
-    fileData.commands.forEach((val) => { if(val.Name === commandName) val.Action = newCommandAction; });
+    const commandIndex = fileData.commands.findIndex((val) => val.Name === commandName);
+    if (commandIndex === -1)
+        return "Command doesn't exist!";
+    fileData.commands[commandIndex].Action = newCommandAction;
 
     try
     {
         await fs.writeFile(FILE_PATH, JSON.stringify(fileData));
+        CachedCommands.set(commandName, newCommandAction);
     }
     catch (error)
     {
@@ -124,10 +134,12 @@ async function CreateCommand(commandName: string, commandAction: string, ) : Pro
             return "An error has occured! Failed to create command.";
         }
     }
-    console.log(dataToWrite);
+
     try
     {
-        return await WriteNewCommand(commandName, commandAction, dataToWrite);
+        let response = await WriteNewCommand(commandName, commandAction, dataToWrite);
+        CachedCommands.set(commandName, commandAction);
+        return response;
     }
     catch (error)
     {
@@ -158,4 +170,23 @@ async function WriteNewCommand(commandName : string, commandAction : string, fil
         .catch(function (error) { throw error; });
 
     return "Command successfully made!";
+}
+
+export async function PrefetchUserMadeCommands()
+{
+    let fileData;
+    try {
+        fileData = await ReadCommandFile();
+        fileData = JSON.parse(fileData);
+    }
+    catch (error) {
+        if (error.code === 'ENOENT') // Nothing to cache
+            return;
+        else {
+            Logger.LogError(error, "Error when trying to read commands file");
+            return;
+        }
+    }
+
+    fileData.commands.forEach((val) => { CachedCommands.set(val.Name, val.Action); });
 }

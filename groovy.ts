@@ -1,6 +1,6 @@
 import Discord from 'discord.js';
 import { HandleMusicCommand, MUSIC_COMMANDS } from './Music/MusicHandler';
-import { HandleUserMadeCommand, USER_MADE_COMMANDS } from './CreateCommand/CommandHandler';
+import { HandleUserMadeCommand, PrefetchUserMadeCommands, USER_MADE_COMMANDS } from './CreateCommand/CommandHandler';
 
 const bot = new Discord.Client({intents: ['GUILDS', 'GUILD_VOICE_STATES', 'GUILD_MESSAGES']});
 const { token } = require('../auth.json');
@@ -46,7 +46,7 @@ export class Logger
 }
 ///END LOGGER SETUP
 
-bot.on('ready', () => { Logger.LogInfo("Ready!"); });
+bot.on('ready', () => { PrefetchUserMadeCommands(); Logger.LogInfo("Ready!"); });
 bot.on('messageCreate', async (message) =>
 {
 	var commandChar = message.content.substring(0, 1);
