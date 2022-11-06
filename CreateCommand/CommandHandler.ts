@@ -38,6 +38,10 @@ export async function HandleUserMadeCommand(command: string, args: string[], mes
                 message.channel.send(result);
             }
             break;
+        default:
+            // Default assumes command exists as user made command because it's passed previous checks
+            message.channel.send(CachedCommands.get(command));
+            break;
     }
 }
 
@@ -189,4 +193,9 @@ export async function PrefetchUserMadeCommands()
     }
 
     fileData.commands.forEach((val) => { CachedCommands.set(val.Name, val.Action); });
+}
+
+export function IsUserMadeCommand(commandName: string) : boolean
+{
+    return CachedCommands.has(commandName);
 }

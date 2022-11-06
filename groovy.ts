@@ -1,6 +1,6 @@
 import Discord from 'discord.js';
 import { HandleMusicCommand, MUSIC_COMMANDS } from './Music/MusicHandler';
-import { HandleUserMadeCommand, PrefetchUserMadeCommands, USER_MADE_COMMANDS } from './CreateCommand/CommandHandler';
+import { HandleUserMadeCommand, IsUserMadeCommand, PrefetchUserMadeCommands, USER_MADE_COMMANDS } from './CreateCommand/CommandHandler';
 
 const bot = new Discord.Client({intents: ['GUILDS', 'GUILD_VOICE_STATES', 'GUILD_MESSAGES']});
 const { token } = require('../auth.json');
@@ -61,7 +61,7 @@ bot.on('messageCreate', async (message) =>
 			return;
         }
 
-		if (USER_MADE_COMMANDS.includes(command))
+		if (USER_MADE_COMMANDS.includes(command) || IsUserMadeCommand(command))
 		{
 			HandleUserMadeCommand(command, args, message);
 			return;
