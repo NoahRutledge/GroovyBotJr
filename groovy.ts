@@ -1,11 +1,9 @@
-import Discord, { Snowflake } from 'discord.js';
+import Discord from 'discord.js';
 import { HandleMusicCommand, MUSIC_COMMANDS } from './Music/MusicHandler';
-import { MusicSubscription } from './Music/Subscription';
 import { HandleUserMadeCommand, USER_MADE_COMMANDS } from './CreateCommand/CommandHandler';
 
 const bot = new Discord.Client({intents: ['GUILDS', 'GUILD_VOICE_STATES', 'GUILD_MESSAGES']});
 const { token } = require('../auth.json');
-export const Subscriptions = new Map<Snowflake, MusicSubscription>();
 
 const TEMPMESSAGE_TIMEOUT_DEFAULT = 2;
 

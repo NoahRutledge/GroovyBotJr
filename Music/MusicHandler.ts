@@ -1,18 +1,19 @@
 ﻿import { DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, VoiceConnectionStatus } from '@discordjs/voice';
 import { validateURL } from 'ytdl-core';
-import Discord, { GuildMember} from 'discord.js';
+import Discord, { Snowflake, GuildMember} from 'discord.js';
 import { Track } from './Track';
 import { MusicSubscription } from './Subscription';
-import { Subscriptions } from '../groovy';
-
 const ytsr = require('ytsr');
+
+export const MUSIC_COMMANDS = ["play", "skip", "pause", "disconnect", "stop", "resume", "remove"];
+
 const YoutubeSearchOptions =
 {
 	limit: 1,
 	safeSearch: false,
 };
 
-export const MUSIC_COMMANDS = ["play", "skip", "pause", "disconnect", "stop", "resume", "remove"];
+const Subscriptions = new Map<Snowflake, MusicSubscription>();
 
 export async function HandleMusicCommand(command: string, args: string[], message: Discord.Message)
 {
