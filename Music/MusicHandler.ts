@@ -35,7 +35,7 @@ export async function HandleMusicCommand(command: string, args: string[], messag
 	{
 		case 'play':
 
-			if (args.length == 1) {
+			if (args.length < 1) {
 				message.channel.send("Please supply an argument");
 				return;
 			}

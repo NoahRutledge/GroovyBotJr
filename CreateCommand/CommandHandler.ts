@@ -9,7 +9,6 @@ let CachedCommands = new Map<string, string>();
 
 export async function HandleUserMadeCommand(command: string, args: string[], message: Discord.Message)
 {
-    args = args.splice(1);
     switch (command)
     {
         case "makecommand":

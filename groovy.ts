@@ -52,8 +52,9 @@ bot.on('messageCreate', async (message) =>
 	var commandChar = message.content.substring(0, 1);
 	if(commandChar == '!' || commandChar == '-')
 	{
-		const args = message.content.substring(1).split(' ');
+		let args = message.content.substring(1).split(' ');
 		const command = args[0].toLowerCase();
+		args = args.splice(1);
 
 		if (MUSIC_COMMANDS.includes(command))
 		{
@@ -70,9 +71,9 @@ bot.on('messageCreate', async (message) =>
 		switch(command)
 		{
 			case 'temp':
-				if (args.length < 2)
+				if (args.length < 1)
 				{
-					message.channel.send("Not enough arguments: temp[message] [(optional) message duration in minutes]");
+					message.channel.send("Not enough arguments: -temp [message] [(optional) message duration in minutes]");
 					return;
 				}
 
@@ -82,11 +83,11 @@ bot.on('messageCreate', async (message) =>
 				if (isNaN(duration))
 				{
 					duration = TEMPMESSAGE_TIMEOUT_DEFAULT;
-					copiedMessage = args.slice(1).join(' ');
+					copiedMessage = args.join(' ');
 				}
 				else
 				{
-					copiedMessage = args.slice(1, -1).join(' ');
+					copiedMessage = args.slice(0, -1).join(' ');
                 }
 
 				var messagePromise = message.channel.send(`${userNickname} said: ${copiedMessage}`);
