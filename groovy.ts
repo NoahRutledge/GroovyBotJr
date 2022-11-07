@@ -76,12 +76,22 @@ bot.on('messageCreate', async (message) =>
 					return;
 				}
 
-				const channel = message.channel;
 				const userNickname = await message.guild.members.fetch(message.author).then(function (result) { return result.nickname; });
+				let copiedMessage;
+				var duration = parseFloat(args[args.length - 1]);
+				if (isNaN(duration))
+				{
+					duration = TEMPMESSAGE_TIMEOUT_DEFAULT;
+					copiedMessage = args.slice(1).join(' ');
+				}
+				else
+				{
+					copiedMessage = args.slice(1, -1).join(' ');
+                }
 
+				var messagePromise = message.channel.send(`${userNickname} said: ${copiedMessage}`);
 				message.delete();
-				var messagePromise = channel.send(`${userNickname} said: ${args[1]}`);
-				var duration = args.length == 3 ? +args[2] : TEMPMESSAGE_TIMEOUT_DEFAULT;
+
 				//Scale up to seconds/minutes
 				duration *= 60000;
 				setTimeout(RemoveTemp, duration, messagePromise);
